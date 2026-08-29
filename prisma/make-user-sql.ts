@@ -27,7 +27,14 @@ const hash = bcrypt.hashSync(password, 10)
 const id = 'usr' + randomUUID().replace(/-/g, '').slice(0, 22)
 
 console.log(`
--- Paste this into phpMyAdmin -> your database -> SQL tab -> Go
+-- Paste into phpMyAdmin -> select your database -> SQL tab -> Go
+-- Safe to run more than once: if the email already exists this resets its
+-- password and reactivates it, rather than failing on a duplicate key.
 INSERT INTO \`User\` (\`id\`, \`name\`, \`email\`, \`passwordHash\`, \`role\`, \`status\`, \`createdAt\`, \`updatedAt\`)
-VALUES ('${id}', '${name.replace(/'/g, "''")}', '${email}', '${hash}', '${role}', 'active', NOW(3), NOW(3));
+VALUES ('${id}', '${name.replace(/'/g, "''")}', '${email}', '${hash}', '${role}', 'active', NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+  \`passwordHash\` = '${hash}',
+  \`role\`         = '${role}',
+  \`status\`       = 'active',
+  \`updatedAt\`    = NOW(3);
 `)

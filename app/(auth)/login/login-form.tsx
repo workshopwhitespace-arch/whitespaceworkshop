@@ -25,7 +25,15 @@ export function LoginForm() {
     setLoading(false)
 
     if (result?.error) {
-      setError("That email or password isn't right. Try again.")
+      // Auth.js reports a rejected credential as CredentialsSignin. Anything
+      // else — an unreachable database, a missing AUTH_SECRET — is a server
+      // problem, and saying "wrong password" for those sends people hunting
+      // in entirely the wrong place.
+      setError(
+        result.error === 'CredentialsSignin'
+          ? "That email or password isn't right. Try again."
+          : 'Sign-in is not working right now — this is a server problem, not your password. Check the server logs.'
+      )
       return
     }
 
